@@ -1,10 +1,13 @@
 package com.example.investments.service.Impl;
 
+import com.example.investments.dto.UserRequestDTO;
+import com.example.investments.dto.UserUpdateDTO;
 import com.example.investments.model.User;
 import com.example.investments.repository.UserRepository;
 import com.example.investments.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,9 +21,22 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
     }
 
+
     @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public UUID createUser(UserRequestDTO userRequestDTO) {
+
+        var user = new User(
+                UUID.randomUUID(),
+                userRequestDTO.username(),
+                userRequestDTO.email(),
+                userRequestDTO.password(),
+                Instant.now(),
+                null);
+
+        var userSaved = userRepository.save(user);
+
+        return userSaved.getUserId();
+
     }
 
     @Override
@@ -34,7 +50,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserById(String userId, User user) {
+    public void updateUserById(String userId, UserUpdateDTO userUpdateDTO) {
 
         var id = UUID.fromString(userId);
 
@@ -42,20 +58,19 @@ public class UserServiceImpl implements UserService {
 
         if (userEntity.isPresent()) {
 
-            var userData = userEntity.get();
+            var user = userEntity.get();
 
-            if (userData.getUsername() != null) {
-                user.setUsername(userData.getUsername());
+            if (userUpdateDTO.username() != null) {
+                user.setUsername(userUpdateDTO.username());
             }
 
-            if (user.getPassword() != null) {
-                user.setPassword(user.getPassword());
+            if (userUpdateDTO.password() != null) {
+                user.setPassword(userUpdateDTO.password());
             }
 
-            userRepository.save(userData);
+            userRepository.save(user);
 
         }
-
     }
 
     @Override
