@@ -2,6 +2,7 @@ package com.example.investments.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -21,16 +22,12 @@ public class Account {
     @PrimaryKeyJoinColumn
     private BillingAddress billingAddress;
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 
     @Column(name = "description")
     private String description;
+
+    @OneToMany(mappedBy = "account")
+    private List<AccountStock> accountStocks;
 
     public Account() {
     }
@@ -46,6 +43,14 @@ public class Account {
 
     public void setAccountId(UUID accountId) {
         this.accountId = accountId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getDescription() {
