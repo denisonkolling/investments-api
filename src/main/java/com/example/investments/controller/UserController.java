@@ -1,5 +1,7 @@
 package com.example.investments.controller;
 
+import com.example.investments.dto.AccountRequestDTO;
+import com.example.investments.dto.AccountResponseDTO;
 import com.example.investments.dto.UserRequestDTO;
 import com.example.investments.dto.UserUpdateDTO;
 import com.example.investments.model.User;
@@ -40,6 +42,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<User>> listUsers() {
+
         var users = userService.listUsers();
 
         return ResponseEntity.ok(users);
@@ -58,4 +61,19 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{userId}/accounts")
+    public ResponseEntity<Void> createAccount(@PathVariable("userId") String userId,
+                                              @RequestBody AccountRequestDTO accountRequestDTO) {
+        userService.createAccount(userId, accountRequestDTO);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{userId}/accounts")
+    public ResponseEntity<List<AccountResponseDTO>> listAccounts(@PathVariable("userId") String userId) {
+
+        var accounts = userService.listAccounts(userId);
+
+        return ResponseEntity.ok(accounts);
+    }
 }

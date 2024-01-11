@@ -1,5 +1,7 @@
 package com.example.investments.service;
 
+import com.example.investments.dto.AccountRequestDTO;
+import com.example.investments.dto.AccountResponseDTO;
 import com.example.investments.dto.UserRequestDTO;
 import com.example.investments.dto.UserUpdateDTO;
 import com.example.investments.model.User;
@@ -20,5 +22,8 @@ public interface UserService {
 
     void deleteById(String userId);
 
+    void createAccount(String userId, AccountRequestDTO accountRequestDTO);
+
+    List<AccountResponseDTO> listAccounts(String userId);
 }
 
