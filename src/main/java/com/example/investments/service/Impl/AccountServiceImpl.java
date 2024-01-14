@@ -1,6 +1,7 @@
 package com.example.investments.service.Impl;
 
-import com.example.investments.dto.AccountStockRequest;
+import com.example.investments.dto.AccountStockRequestDTO;
+import com.example.investments.dto.AccountStockResponseDTO;
 import com.example.investments.model.AccountStock;
 import com.example.investments.model.AccountStockId;
 import com.example.investments.repository.AccountRepository;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -27,12 +29,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void associateStock(String accountId, AccountStockRequest accountStockRequest) {
+    public void associateStock(String accountId, AccountStockRequestDTO accountStockRequestDTO) {
 
         var account = accountRepository.findById(UUID.fromString(accountId))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        var stock = stockRepository.findById(accountStockRequest.stockId())
+        var stock = stockRepository.findById(accountStockRequestDTO.stockId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         var id = new AccountStockId(account.getAccountId(), stock.getStockId());
@@ -40,9 +42,26 @@ public class AccountServiceImpl implements AccountService {
                 id,
                 account,
                 stock,
-                accountStockRequest.quantity()
+                accountStockRequestDTO.quantity()
         );
 
         accountStockRepository.save(entity);
+    }
+
+    @Override
+    public List listStock(String accountId) {
+
+        var account = accountRepository.findById(UUID.fromString(accountId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return account.getAccountStocks()
+                .stream()
+                .map(accountStock ->
+                        new AccountStockResponseDTO(
+                                accountStock.getStock().getStockId(),
+                                accountStock.getQuantity(),
+                                0D
+                        ))
+                .toList();
     }
 }
