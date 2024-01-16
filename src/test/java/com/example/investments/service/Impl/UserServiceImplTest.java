@@ -7,6 +7,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Instant;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +27,10 @@ class UserServiceImplTest {
 
     @InjectMocks
     private UserServiceImpl userServiceImpl;
+
+
+    @Captor
+    private ArgumentCaptor<User> userArgumentCaptor;
 
     @Nested
     class createUser {
@@ -44,7 +50,7 @@ class UserServiceImplTest {
                     null
             );
 
-            doReturn(user).when(userRepository).save(any());
+            doReturn(user).when(userRepository).save(userArgumentCaptor.capture());
 
             var input = new UserRequestDTO(
                     "username",
@@ -57,7 +63,12 @@ class UserServiceImplTest {
             var output = userServiceImpl.createUser(input);
 
             //Assert
+
+            var userCaptured = userArgumentCaptor.getValue();
+
+            assertEquals(input.username(), userCaptured.getUsername());
+            assertEquals(input.email(), userCaptured.getEmail());
+            assertEquals(input.password(), userCaptured.getPassword());
         }
     }
-
 }
