@@ -14,10 +14,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -28,9 +31,11 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userServiceImpl;
 
-
     @Captor
     private ArgumentCaptor<User> userArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<UUID> uuidArgumentCaptor;
 
     @Nested
     class createUser {
@@ -70,5 +75,58 @@ class UserServiceImplTest {
             assertEquals(input.email(), userCaptured.getEmail());
             assertEquals(input.password(), userCaptured.getPassword());
         }
+
+        @Test
+        @DisplayName("Should throw exception when error occurs")
+        void shouldThrowExceptionWhenErrorOccurs() {
+
+            // Arrange
+
+            doThrow(new RuntimeException()).when(userRepository).save(any());
+
+            var input = new UserRequestDTO(
+                    "username",
+                    "email@email.com",
+                    "123"
+            );
+
+            // Act & Assert
+            assertThrows(RuntimeException.class, () -> userServiceImpl.createUser(input));
+        }
+    }
+
+    @Nested
+    class getUserById {
+        @Test
+        @DisplayName("Return user by id with success")
+        void getUserByIdWithSuccess() {
+
+            // Arrange
+
+            var user = new User(
+                    UUID.randomUUID(),
+                    "username",
+                    "email@email.com",
+                    "password",
+                    Instant.now(),
+                    null
+            );
+
+
+            doReturn(Optional.of(user))
+                    .when(userRepository)
+                    .findById(uuidArgumentCaptor.capture());
+
+            // Act
+            var output = userServiceImpl.getUserById(user.getUserId().toString());
+
+            // Assert
+
+            assertTrue(output.isPresent());
+            assertEquals(user.getUserId(), uuidArgumentCaptor.getValue());
+
+        }
+
+
     }
 }
